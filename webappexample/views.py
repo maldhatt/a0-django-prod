@@ -4,6 +4,12 @@ from django.conf import settings
 from django.shortcuts import redirect, render, redirect
 from django.urls import reverse
 from urllib.parse import quote_plus, urlencode
+# Lib additions
+from django.http import HttpResponse
+import requests
+import logging
+
+logger = logging.getLogger(__name__)
 
 oauth = OAuth()
 
@@ -56,6 +62,42 @@ def logout(request):
         ),
     )
 
-
 def self_serve(request):
-    oauth.auth0.authorize_redirect()
+    api = f"https://{settings.AUTH0_DOMAIN}/api/v2/tickets/sso-access"
+    #api = f"https://{settings.AUTH0_DOMAIN}/api/v2/users"
+    headers = {
+        "Authorization": f"Bearer {settings.AUTH0_API_TOKEN}",
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "sso_profile_id": f"{settings.AUTH0_SELFSERVE_ID}",
+        "connection_config": {
+            "name": "self-service-Django"
+        },
+        "testing_config": {
+            "testing_login_url": "https://atko-mv-org.vercel.app/login"
+        }
+    }
+
+    try:
+        response = requests.post(api, headers=headers, json=payload)
+        #response = requests.get(api, headers=headers)
+
+        logger.debug(f"Response Code: {response.status_code}")
+        logger.debug(f"Response Content: {response.content}")
+
+        if response.status_code == 201:
+            data = response.json()
+            self_serve_url = data.get("ticket")
+            if self_serve_url:
+                return redirect(self_serve_url)
+            else:
+                logger.error("Error: 'ticket' not found in the response.")
+                return HttpResponse("Error: 'ticket' not found in the response.", status=500)
+        else:
+            logger.error(f"Error {response.content}")
+            return HttpResponse(f"Error: {response.content}", status=500)
+    except Exception as e:
+        logger.exception("An error occurred while fetching .")
+        return HttpResponse("Please try again later.", status=500)
