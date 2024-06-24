@@ -7,5 +7,6 @@ urlpatterns = [
     path("login", views.login, name="login"),
     path("logout", views.logout, name="logout"),
     path("callback", views.callback, name="callback"),
+    path("passkey", views.passkey, name="passkey"),
     path("Self Serve", views.self_serve, name="Self Serve")
 ]

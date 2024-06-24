@@ -13,15 +13,29 @@ logger = logging.getLogger(__name__)
 
 oauth = OAuth()
 
+# To pass in multiple client_ids, sill pass in client_ID dynamically later
 oauth.register(
     "auth0",
-    client_id=settings.AUTH0_CLIENT_ID,
     client_secret=settings.AUTH0_CLIENT_SECRET,
     client_kwargs={
         "scope": "openid profile email",
     },
     server_metadata_url=f"https://{settings.AUTH0_DOMAIN}/.well-known/openid-configuration",
 )
+
+# Trying building Auth0 URL
+def build_authorization_url(client_id, redirect_uri, state=None, scope="openid profile email"):
+    base_url = f"https://{settings.AUTH0_DOMAIN}/authorize"
+    params = {
+        "response_type": "code",
+        "client_id": client_id,
+        "redirect_uri": redirect_uri,
+        "scope": scope,
+    }
+    if state:
+        params["state"] = state
+
+    return f"{base_url}?{urlencode(params)}"
 
 
 def index(request):
@@ -41,12 +55,24 @@ def callback(request):
     request.session["user"] = token
     return redirect(request.build_absolute_uri(reverse("index")))
 
-
 def login(request):
-    return oauth.auth0.authorize_redirect(
-        request, request.build_absolute_uri(reverse("callback"))
-    )
+    redirect_uri = request.build_absolute_uri(reverse("callback"))
+    auth_url = build_authorization_url(settings.AUTH0_CLIENT_ID, redirect_uri)
+    return redirect(auth_url)
 
+"""
+def login(request):
+    oauth.auth0.client_kwargs["client_id"]=settings.AUTH0_CLIENT_ID
+    return oauth.auth0.authorize_redirect(
+        request, request.build_absolute_uri(reverse("callback")),
+        client_id=settings.AUTH0_CLIENT_ID
+    ) 
+"""
+
+def passkey(request):
+    redirect_uri = request.build_absolute_uri(reverse("callback"))
+    auth_url = build_authorization_url(settings.AUTH0_CLIENT_ID_PK, redirect_uri)
+    return redirect(auth_url)
 
 def logout(request):
     request.session.clear()
@@ -73,7 +99,7 @@ def self_serve(request):
     payload = {
         "sso_profile_id": f"{settings.AUTH0_SELFSERVE_ID}",
         "connection_config": {
-            "name": "self-service-Django"
+            "name": "ss-sso-testing123"
         },
         "testing_config": {
             "testing_login_url": "https://atko-mv-org.vercel.app/login"
