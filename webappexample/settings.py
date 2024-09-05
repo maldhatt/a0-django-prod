@@ -38,6 +38,12 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+# Adding weird sessions stuff becuase Auth0 is not working
+# SESSION_COOKIE_SECURE setting to false is for development without SSL as Django may require
+# HTTPS for secure cookies
+#SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
+#SESSION_COOKIE_SECURE = False
+
 ROOT_URLCONF = "webappexample.urls"
 
 TEMPLATES = [
@@ -110,7 +116,7 @@ if ENV_FILE:
 
 AUTH0_DOMAIN = os.environ.get("AUTH0_DOMAIN")
 AUTH0_CLIENT_ID = os.environ.get("AUTH0_CLIENT_ID")
-AUTH0_CLIENT_ID_PK=os.environ.get("AUTH0_CLIENT_ID_PK")
+AUTH0_CLIENT_ID_PK = os.environ.get("AUTH0_CLIENT_ID_PK")
 AUTH0_CLIENT_SECRET = os.environ.get("AUTH0_CLIENT_SECRET")
 AUTH0_API_TOKEN = os.environ.get("AUTH0_API_TOKEN")
 AUTH0_SELFSERVE_ID = os.environ.get("AUTH0_SELFSERVE_ID")

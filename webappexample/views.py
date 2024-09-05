@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 oauth = OAuth()
 
-# To pass in multiple client_ids, sill pass in client_ID dynamically later
+# To pass in multiple client_ids, still pass in client_ID dynamically later
 oauth.register(
     "auth0",
     client_secret=settings.AUTH0_CLIENT_SECRET,
@@ -32,6 +32,7 @@ def build_authorization_url(client_id, redirect_uri, state=None, scope="openid p
         "redirect_uri": redirect_uri,
         "scope": scope,
     }
+
     if state:
         params["state"] = state
 
@@ -51,11 +52,43 @@ def index(request):
 
 
 def callback(request):
+    """
+    session_state = request.session.session_key
+    print(f"Session Key in callback: {session_state}")
+
+    # Attempt to authorize the token and check for any issues
+    try:
+        token = oauth.auth0.authorize_access_token(request)
+        print(f"Token received: {token}")
+    except Exception as e:
+        print(f"Error in authorize_access_token: {str(e)}")
+        raise
+
+    # Ensure the state from Auth0 matches the session state
+    if token.get('state') != session_state:
+        print(f"State mismatch! Token state: {token.get('state')}, Session state: {session_state}")
+        raise Exception("State mismatch! Possible CSRF attack.")
+
+    # Store user info in the session after successful state check
+    request.session["user"] = token
+    print(f"Session Data After Set: {request.session.get('user')}")
+
+    return redirect(request.build_absolute_uri(reverse("index")))
+    """
     token = oauth.auth0.authorize_access_token(request)
     request.session["user"] = token
+    print(f"Session Data After Set: {request.session.get('user')}")
     return redirect(request.build_absolute_uri(reverse("index")))
 
+
 def login(request):
+    """
+    if not request.session.session_key:
+        request.session.create()
+        print(f"New Session Key Created: {request.session.session_key}")  # Verify the session key creation
+
+    state = request.session.session_key
+    """
     redirect_uri = request.build_absolute_uri(reverse("callback"))
     auth_url = build_authorization_url(settings.AUTH0_CLIENT_ID, redirect_uri)
     return redirect(auth_url)
@@ -72,6 +105,7 @@ def login(request):
 
 def passkey(request):
     redirect_uri = request.build_absolute_uri(reverse("callback"))
+    # Swap Client IDs
     auth_url = build_authorization_url(settings.AUTH0_CLIENT_ID_PK, redirect_uri)
     return redirect(auth_url)
 
