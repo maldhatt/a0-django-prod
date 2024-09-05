@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
+    "django.contrib.staticfiles",
 ]
 
 MIDDLEWARE = [
@@ -113,3 +114,20 @@ AUTH0_CLIENT_ID_PK=os.environ.get("AUTH0_CLIENT_ID_PK")
 AUTH0_CLIENT_SECRET = os.environ.get("AUTH0_CLIENT_SECRET")
 AUTH0_API_TOKEN = os.environ.get("AUTH0_API_TOKEN")
 AUTH0_SELFSERVE_ID = os.environ.get("AUTH0_SELFSERVE_ID")
+
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/5.0/howto/static-files/
+
+STATIC_URL = '/static/'
+# Adding more
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "webappexample", "static"),
+]
+
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+
+# Media files (user-uploaded content)
+MEDIA_URL = '/images/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'static/images')

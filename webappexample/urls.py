@@ -1,5 +1,9 @@
 from django.urls import path
 
+# adding to serve static files for development
+from django.conf import settings
+from django.conf.urls.static import static
+
 from . import views
 
 urlpatterns = [
@@ -10,3 +14,6 @@ urlpatterns = [
     path("passkey", views.passkey, name="passkey"),
     path("Self Serve", views.self_serve, name="Self Serve")
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

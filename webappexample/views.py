@@ -61,11 +61,12 @@ def login(request):
     return redirect(auth_url)
 
 """
+This is the default Auth0 SDK language
 def login(request):
     oauth.auth0.client_kwargs["client_id"]=settings.AUTH0_CLIENT_ID
     return oauth.auth0.authorize_redirect(
-        request, request.build_absolute_uri(reverse("callback")),
-        client_id=settings.AUTH0_CLIENT_ID
+        request, request.build_absolute_uri(reverse("callback"))
+        #client_id=settings.AUTH0_CLIENT_ID
     ) 
 """
 
@@ -89,7 +90,7 @@ def logout(request):
     )
 
 def self_serve(request):
-    api = f"https://{settings.AUTH0_DOMAIN}/api/v2/tickets/sso-access"
+    api = f"https://{settings.AUTH0_DOMAIN}/api/v2/self-service-profiles/{settings.AUTH0_SELFSERVE_ID}/sso-ticket"
     #api = f"https://{settings.AUTH0_DOMAIN}/api/v2/users"
     headers = {
         "Authorization": f"Bearer {settings.AUTH0_API_TOKEN}",
@@ -97,12 +98,9 @@ def self_serve(request):
     }
 
     payload = {
-        "sso_profile_id": f"{settings.AUTH0_SELFSERVE_ID}",
+        # Change this config name each time we run this!
         "connection_config": {
-            "name": "ss-sso-testing123"
-        },
-        "testing_config": {
-            "testing_login_url": "https://atko-mv-org.vercel.app/login"
+            "name": "ss-sso-123543125"
         }
     }
 
