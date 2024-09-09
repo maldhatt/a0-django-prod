@@ -25,6 +25,17 @@ oauth.register(
     server_metadata_url=f"https://{settings.AUTH0_DOMAIN}/.well-known/openid-configuration",
 )
 
+# Trying multi-client oauth registration via authlib
+oauth.register(
+    "passkey",
+    client_id=settings.AUTH0_CLIENT_ID_PK,
+    client_secret=settings.AUTH0_CLIENT_SECRET_PK,
+    client_kwargs={
+        "scope": "openid profile email",
+    },
+    server_metadata_url=f"https://{settings.AUTH0_DOMAIN}/.well-known/openid-configuration",
+)
+
 # Client IDs
 oauth2Client = OAuth2Session(client_id=settings.AUTH0_CLIENT_ID, client_secret=settings.AUTH0_CLIENT_SECRET, scope="openid profile email")
 oauth2Client_pk = OAuth2Session(client_id=settings.AUTH0_CLIENT_ID_PK, client_secret=settings.AUTH0_CLIENT_SECRET_PK, scope="openid profile email")
@@ -60,38 +71,59 @@ def index(request):
 
 
 def callback(request):
-    print(f"callback request: {request}")
-    #token = oauth.auth0.authorize_access_token(request)
-    authorization_response = request.build_absolute_uri()
-    token = oauth2Client.fetch_token(token_endpoint, authorization_response=authorization_response,
-                                     redirect_uri=redirect_uri)
+    token = oauth.auth0.authorize_access_token(request)
     request.session["user"] = token
-    #print(f"Session Data After Set: {request.session.get('user')}")
     return redirect(request.build_absolute_uri(reverse("index")))
+
+# def callback(request):
+#     print(f"callback request: {request}")
+#     #token = oauth.auth0.authorize_access_token(request)
+#     authorization_response = request.build_absolute_uri()
+#     token = oauth2Client.fetch_token(token_endpoint, authorization_response=authorization_response,
+#                                      redirect_uri=redirect_uri)
+#     request.session["user"] = token
+#     #print(f"Session Data After Set: {request.session.get('user')}")
+#     return redirect(request.build_absolute_uri(reverse("index")))
 
 
 def login(request):
-    redirect_uri = request.build_absolute_uri(reverse("callback"))
-    auth_url = build_authorization_url(settings.AUTH0_CLIENT_ID, redirect_uri)
-    print(f"Login auth_url: {auth_url}")
-    return redirect(auth_url)
+    return oauth.auth0.authorize_redirect(
+        request, request.build_absolute_uri(reverse("callback"))
+    )
+
+# def login(request):
+#     redirect_uri = request.build_absolute_uri(reverse("callback"))
+#     auth_url = build_authorization_url(settings.AUTH0_CLIENT_ID, redirect_uri)
+#     print(f"Login auth_url: {auth_url}")
+#     return redirect(auth_url)
 
 
 def callback_pk(request):
-    print(f"callback request: {request}")
-    authorization_response = request.build_absolute_uri()
-    # Swap OAuth Clients for separate client_IDs
-    token = oauth2Client_pk.fetch_token(token_endpoint, authorization_response=authorization_response,
-                                     redirect_uri=redirect_uri)
+    token = oauth.passkey.authorize_access_token(request)
     request.session["user"] = token
     return redirect(request.build_absolute_uri(reverse("index")))
 
 
+# def callback_pk(request):
+#     print(f"callback request: {request}")
+#     authorization_response = request.build_absolute_uri()
+#     # Swap OAuth Clients for separate client_IDs
+#     token = oauth2Client_pk.fetch_token(token_endpoint, authorization_response=authorization_response,
+#                                      redirect_uri=redirect_uri)
+#     request.session["user"] = token
+#     return redirect(request.build_absolute_uri(reverse("index")))
+
+
+# def passkey(request):
+#     redirect_uri = request.build_absolute_uri(reverse("callback_pk"))
+#     # Swap Client IDs
+#     auth_url = build_authorization_url(settings.AUTH0_CLIENT_ID_PK, redirect_uri)
+#     return redirect(auth_url)
+
 def passkey(request):
-    redirect_uri = request.build_absolute_uri(reverse("callback_pk"))
-    # Swap Client IDs
-    auth_url = build_authorization_url(settings.AUTH0_CLIENT_ID_PK, redirect_uri)
-    return redirect(auth_url)
+    return oauth.passkey.authorize_redirect(
+        request, request.build_absolute_uri(reverse("callback_pk"))
+    )
 
 
 def logout(request):
