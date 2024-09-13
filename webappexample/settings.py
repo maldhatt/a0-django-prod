@@ -17,7 +17,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 DEBUG = False
 
 # Added for Heroku
-ALLOWED_HOSTS = ["halden0.herokuapp.com", "127.0.0.1"]
+ALLOWED_HOSTS = ["halden0.herokuapp.com", "halden0-323d4b292113.herokuapp.com", "127.0.0.1", "localhost"]
 
 # Application definition
 
