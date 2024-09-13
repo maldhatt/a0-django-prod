@@ -41,6 +41,18 @@ oauth.register(
     server_metadata_url=f"https://{settings.AUTH0_DOMAIN}/.well-known/openid-configuration",
 )
 
+# Orgs
+oauth.register(
+    "orgs",
+    client_id=settings.AUTH0_CLIENT_ID_ORGS,
+    client_secret=settings.AUTH0_CLIENT_SECRET_ORGS,
+    client_kwargs={
+        "scope": "openid profile email",
+        "audience": audience,
+    },
+    server_metadata_url=f"https://{settings.AUTH0_DOMAIN}/.well-known/openid-configuration"
+)
+
 
 # Function to decode JWT without verification for display purposes
 def decode_jwt(token):
@@ -123,6 +135,22 @@ def passkey(request):
     )
 
 
+def callback_orgs(request):
+    token = oauth.orgs.authorize_access_token(request)
+    print(token)
+    request.session["user"] = token
+    return redirect(request.build_absolute_uri(reverse("index")))
+
+
+def login_orgs(request):
+    return oauth.orgs.authorize_redirect(
+        request,
+        request.build_absolute_uri(reverse("callback_orgs")),
+        audience=audience,
+        organization="org_bRt9k4URJEGcPM5k"
+    )
+
+
 def logout(request):
     print(f"logout request: {request}")
     request.session.clear()
@@ -150,7 +178,7 @@ def self_serve(request):
     payload = {
         # Change this config name each time we run this!
         "connection_config": {
-            "name": "ss-sso-123543125"
+            "name": "ss-sso-new-demo"
         }
     }
 

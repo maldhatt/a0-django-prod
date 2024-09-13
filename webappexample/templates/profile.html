@@ -36,17 +36,17 @@
                 <!-- Add user session data -->
                 <h1>Profile for {{session.userinfo.nickname}}</h1>
                 <p class="lead">JWTs below: </p>
+            </div>
 
                 <!-- Display the decoded ID token -->
                 <h2>Decoded ID Token:</h2>
-                <pre>{{ pretty_id }}</pre>
+                <div><pre>{{ pretty_id }}</pre></div>
+
 
                 <!-- Display the decoded Access Token -->
                 <h2>Decoded Access Token:</h2>
-                <pre>{{ pretty_access }}</pre>
+                <div><pre>{{ pretty_access }}</pre></div>
             </div>
-        </div>
-        <div><pre>{{pretty}}</pre></div>
         <!-- Without Session-->
         <!-- Bootstrap core JS-->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>

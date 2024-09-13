@@ -13,7 +13,9 @@ urlpatterns = [
     path("logout", views.logout, name="logout"),
     path("callback", views.callback, name="callback"),
     path("callback_pk", views.callback_pk, name="callback_pk"),
+    path("callback_orgs", views.callback_orgs, name="callback_orgs"),
     path("passkey", views.passkey, name="passkey"),
+    path("login_orgs", views.login_orgs, name="login_orgs"),
     path("Self Serve", views.self_serve, name="Self Serve")
 ]
 
