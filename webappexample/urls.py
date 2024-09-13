@@ -17,7 +17,7 @@ urlpatterns = [
     path("passkey", views.passkey, name="passkey"),
     path("login_orgs", views.login_orgs, name="login_orgs"),
     path("Self Serve", views.self_serve, name="Self Serve")
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)  # added this line for Heroku
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

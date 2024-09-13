@@ -10,12 +10,14 @@ TEMPLATE_DIR = os.path.join(BASE_DIR, "webappexample", "templates")
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "auth0-webappexample-k0n4a#6cqu9=co$_bu^^sd@&^8#*%ukg3z4ku!lj&j)%^@cx8%"
+# changed this for Herkou
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+# Added for Heroku
+ALLOWED_HOSTS = ["halden0.herokuapp.com", "127.0.0.1"]
 
 # Application definition
 
@@ -30,6 +32,8 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    # adding white noise for Heroku
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -134,8 +138,8 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "webappexample", "static"),
 ]
 
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-
+#STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Media files (user-uploaded content)
 MEDIA_URL = '/images/'
