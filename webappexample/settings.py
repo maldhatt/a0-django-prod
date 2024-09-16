@@ -14,7 +14,7 @@ TEMPLATE_DIR = os.path.join(BASE_DIR, "webappexample", "templates")
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 # Added for Heroku
 ALLOWED_HOSTS = ["halden0.herokuapp.com", "halden0-323d4b292113.herokuapp.com", "127.0.0.1", "localhost"]
@@ -138,8 +138,10 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "webappexample", "static"),
 ]
 
-#STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# Changed below for Heroku
+
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+#STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Media files (user-uploaded content)
 MEDIA_URL = '/images/'
