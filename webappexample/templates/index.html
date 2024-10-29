@@ -39,7 +39,7 @@
                 <p class="lead">You have logged-in!</p>
             </div>
         </div>
-        <div><pre>{{pretty}}</pre></div>
+        <!--<div><pre>{{pretty}}</pre></div> -->
         <!-- Without Session-->
         {% else %}
         <!-- Responsive navbar-->
@@ -56,6 +56,8 @@
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                                 <li><a class="dropdown-item" href="{% url 'login' %}" id="qsLoginBtn"">Login</a></li>
                                 <li><a class="dropdown-item" href="{% url 'passkey' %}">Login w/ Passkeys</a></li>
+                                <li><a class="dropdown-item" href="{% url 'login_pwless_email' %}">Login w/ Email Passwordless</a></li>
+                                <li><a class="dropdown-item" href="{% url 'login_pwless_sms' %}">Login w/ SMS Passwordless</a></li>
                                 <li><hr class="dropdown-divider" /></li>
                                 <li><a class="dropdown-item" href="{% url 'login_orgs' %}">Login w/ Coca Cola</a></li>
                                 <li><hr class="dropdown-divider" /></li>

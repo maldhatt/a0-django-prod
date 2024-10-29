@@ -10,6 +10,8 @@ from django.http import HttpResponse
 import requests
 import logging
 import jwt
+from auth0.v3.authentication import GetToken
+
 from django.contrib.auth.decorators import login_required
 
 logger = logging.getLogger(__name__)
@@ -41,7 +43,31 @@ oauth.register(
     server_metadata_url=f"https://{settings.AUTH0_DOMAIN}/.well-known/openid-configuration",
 )
 
-# Orgs
+# Passwordless-Email
+oauth.register(
+    "pwless_email",
+    client_id=settings.AUTH0_CLIENT_ID_PWLESS_E,
+    client_secret=settings.AUTH0_CLIENT_SECRET_PWLESS_E,
+    client_kwargs={
+        "scope": "openid profile email",
+        "audience": audience,
+    },
+    server_metadata_url=f"https://{settings.AUTH0_DOMAIN}/.well-known/openid-configuration"
+)
+
+# Passwordless-SMS
+oauth.register(
+    "pwless_sms",
+    client_id=settings.AUTH0_CLIENT_ID_PWLESS_SMS,
+    client_secret=settings.AUTH0_CLIENT_SECRET_PWLESS_SMS,
+    client_kwargs={
+        "scope": "openid profile email",
+        "audience": audience,
+    },
+    server_metadata_url=f"https://{settings.AUTH0_DOMAIN}/.well-known/openid-configuration"
+)
+
+# Orgs - No Prompt
 oauth.register(
     "orgs",
     client_id=settings.AUTH0_CLIENT_ID_ORGS,
@@ -134,6 +160,34 @@ def passkey(request):
         audience=audience
     )
 
+def callback_pwless_email(request):
+    token = oauth.pwless_email.authorize_access_token(request)
+    request.session["user"] = token
+    print("Token received:", token)  # Log the token
+    return redirect(request.build_absolute_uri(reverse("index")))
+
+
+def login_pwless_email(request):
+    return oauth.pwless_email.authorize_redirect(
+        request,
+        request.build_absolute_uri(reverse("callback_pwless_email")),
+        audience=audience
+    )
+
+
+def callback_pwless_sms(request):
+    token = oauth.pwless_sms.authorize_access_token(request)
+    request.session["user"] = token
+    print("Token received:", token)  # Log the token
+    return redirect(request.build_absolute_uri(reverse("index")))
+
+
+def login_pwless_sms(request):
+    return oauth.pwless_sms.authorize_redirect(
+        request,
+        request.build_absolute_uri(reverse("callback_pwless_sms")),
+        audience=audience
+    )
 
 def callback_orgs(request):
     token = oauth.orgs.authorize_access_token(request)
@@ -168,17 +222,32 @@ def logout(request):
 
 
 def self_serve(request):
+
+    # Grab Token & Check
+    #get_token = GetToken.client_credentials(self=settings.AUTH0_DOMAIN, client_id=settings.AUTH0_CLIENT_ID_SELFSERVE, client_secret=settings.AUTH0_CLIENT_SECRET_SELFSERVE, audience="https://dev-kps6vgfkf1e6r4tr.us.auth0.com/api/v2/")
+    get_token_ = GetToken(settings.AUTH0_DOMAIN)
+    get_token = get_token_.client_credentials(
+        client_id=settings.AUTH0_CLIENT_ID_SELFSERVE,
+        client_secret=settings.AUTH0_CLIENT_SECRET_SELFSERVE,
+        audience="https://dev-kps6vgfkf1e6r4tr.us.auth0.com/api/v2/"
+    )
+    mgmt_api_token = get_token['access_token']
+    #print("We got the token: ", mgmt_api_token)
+    #print("Decoded Token: ", decode_jwt(mgmt_api_token))
+
+
+    # API Call
     api = f"https://{settings.AUTH0_DOMAIN}/api/v2/self-service-profiles/{settings.AUTH0_SELFSERVE_ID}/sso-ticket"
-    #api = f"https://{settings.AUTH0_DOMAIN}/api/v2/users"
     headers = {
-        "Authorization": f"Bearer {settings.AUTH0_API_TOKEN}",
+        #"Authorization": f"Bearer {settings.AUTH0_API_TOKEN}",
+        "Authorization": f"Bearer {mgmt_api_token}",
         "Content-Type": "application/json"
     }
 
     payload = {
         # Change this config name each time we run this!
         "connection_config": {
-            "name": "ss-sso-new-demo"
+            "name": "ss-new-one"
         }
     }
 
