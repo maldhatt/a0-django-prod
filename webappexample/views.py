@@ -10,6 +10,7 @@ from django.http import HttpResponse
 import requests
 import logging
 import jwt
+import time
 from auth0.v3.authentication import GetToken
 
 from django.contrib.auth.decorators import login_required
@@ -244,10 +245,13 @@ def self_serve(request):
         "Content-Type": "application/json"
     }
 
+    # random number to randomize SSO profile each time
+    random = str(int(time.time()))
+
     payload = {
         # Change this config name each time we run this!
         "connection_config": {
-            "name": "ss-new-one"
+            "name": f"ss-sso-{random}"
         }
     }
 
@@ -272,4 +276,3 @@ def self_serve(request):
     except Exception as e:
         logger.exception("An error occurred while fetching .")
         return HttpResponse("Please try again later.", status=500)
-
